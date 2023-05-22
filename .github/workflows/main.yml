@@ -7,6 +7,9 @@ on:
 
   pull_request:
 
+env:
+  THE_ONE_ACCESS_TOKEN: ${{ secrets.THE_ONE_ACCESS_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
