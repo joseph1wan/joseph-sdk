@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    lotr-sdk (0.1.0)
+    lotr-sdk (0.1.1)
       http (~> 5.1)
 
 GEM
