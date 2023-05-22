@@ -6,9 +6,8 @@ module Lotr
     class Quote
       attr_reader :data
 
-      def initialize(data, movie = nil)
+      def initialize(data)
         @data = data
-        @movie = movie
       end
 
       # Represents the quote ID
