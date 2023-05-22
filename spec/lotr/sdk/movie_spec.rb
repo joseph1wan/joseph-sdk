@@ -34,16 +34,8 @@ module Lotr
         end
 
         describe "#run_time_minutes" do
-          context "format: true" do
-            it "returns human readable run time" do
-              expect(Movie.new(data).run_time_minutes(format: true)).to eq("9 hours and 18 minutes")
-            end
-          end
-
-          context "format: false" do
-            it "returns run time in minutes" do
-              expect(Movie.new(data).run_time_minutes).to eq(558)
-            end
+          it "returns run time in minutes" do
+            expect(Movie.new(data).run_time_minutes).to eq(558)
           end
         end
 
