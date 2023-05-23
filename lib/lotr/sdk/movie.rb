@@ -4,11 +4,10 @@ module Lotr
   module Sdk
     # Movie represents the data of a movie.
     class Movie
-      attr_reader :data, :quotes
+      attr_reader :data
 
       def initialize(data)
         @data = data
-        @quotes = []
       end
 
       # Represents the movie ID
