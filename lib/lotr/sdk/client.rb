@@ -73,10 +73,13 @@ module Lotr
       #   The Two Towers
       #   The Return of the King
       # @return [Array<Quote>] All quotes belonging to the movie
-      def movie_quotes(movie_id, movie = nil)
+      def movie_quotes(movie_id, q: {})
         raise Exception::MovieNotSupportedError.new(MOVIES_WITH_QUOTES) unless ENV["DISABLE_MOVIE_CHECK"] || MOVIES_WITH_QUOTES.include?(movie_id)
 
         endpoint = "/movie/#{movie_id}/quote"
+        if q.any?
+          endpoint += "?" + transform_query_parameters(q)
+        end
         uri = URI("#{@api_url}/#{endpoint}")
         response = JSON.parse(@client.get(uri).body)
         response["docs"].map do |quote_data|
@@ -87,8 +90,8 @@ module Lotr
       # Fetch all quotes belonging to a movie.
       # Uses movie_quotes with same limitations
       # @return [Array<Quote>] All quotes belonging to the movie
-      def movie_quotes_from_movie(movie)
-        movie_quotes(movie.id, movie)
+      def movie_quotes_from_movie(movie, q: {})
+        movie_quotes(movie.id, q: q)
       end
 
       # Fetch a specified quote
