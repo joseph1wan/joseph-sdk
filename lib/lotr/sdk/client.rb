@@ -74,9 +74,9 @@ module Lotr
       #   The Return of the King
       # @return [Array<Quote>] All quotes belonging to the movie
       def movie_quotes(id, q: {})
+        movie_id = validate_id(id)
         raise Exception::MovieNotSupportedError.new(MOVIES_WITH_QUOTES) unless ENV["DISABLE_MOVIE_CHECK"] || MOVIES_WITH_QUOTES.include?(movie_id)
 
-        movie_id = validate_id(id)
         endpoint = "/movie/#{movie_id}/quote"
         if q.any?
           endpoint += "?" + transform_query_parameters(q)
@@ -103,7 +103,6 @@ module Lotr
         endpoint = "/quote/#{quote_id}"
         uri = URI("#{@api_url}/#{endpoint}")
         response = JSON.parse(@client.get(uri).body)
-
         raise Exception::ResourceNotFoundError.new(:quote, id) if response["total"].zero?
 
         quote_data = response["docs"].first
