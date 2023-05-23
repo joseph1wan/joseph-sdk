@@ -7,6 +7,8 @@ module Lotr
       ID_REGEX = /^[0-9a-f]{24}$/i.freeze
       MOVIES_WITH_QUOTES = %w[5cd95395de30eff6ebccde5c 5cd95395de30eff6ebccde5b 5cd95395de30eff6ebccde5d"].freeze # IDs for the original trilogy
 
+      attr_reader :client
+
       # Initialize client with an access token
       #   1. Sign up at https://the-one-api.dev/sign-up
       #   2. Provide the access token.
@@ -14,7 +16,7 @@ module Lotr
       #          or
       #        Set the token to the THE_ONE_ACCESS_TOKEN env variable
       def initialize(access_token: nil)
-        @api_url = "https://the-one-api.dev/v2"
+        @api_url ="https://the-one-api.dev/v2"
         if access_token.nil?
           access_token = ENV["THE_ONE_ACCESS_TOKEN"]
         end
