@@ -73,9 +73,10 @@ module Lotr
       #   The Two Towers
       #   The Return of the King
       # @return [Array<Quote>] All quotes belonging to the movie
-      def movie_quotes(movie_id, q: {})
+      def movie_quotes(id, q: {})
         raise Exception::MovieNotSupportedError.new(MOVIES_WITH_QUOTES) unless ENV["DISABLE_MOVIE_CHECK"] || MOVIES_WITH_QUOTES.include?(movie_id)
 
+        movie_id = validate_id(id)
         endpoint = "/movie/#{movie_id}/quote"
         if q.any?
           endpoint += "?" + transform_query_parameters(q)
