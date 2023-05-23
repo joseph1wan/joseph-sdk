@@ -4,6 +4,7 @@ module Lotr
   module Sdk
     # Client instantiates an HTTP client and makes all API calls
     class Client
+      API_URL = "https://the-one-api.dev/v2"
       ID_REGEX = /^[0-9a-f]{24}$/i.freeze
       MOVIES_WITH_QUOTES = %w[5cd95395de30eff6ebccde5c 5cd95395de30eff6ebccde5b 5cd95395de30eff6ebccde5d"].freeze # IDs for the original trilogy
       PAGINATION_DEFAULT = {
@@ -19,7 +20,6 @@ module Lotr
       #          or
       #        Set the token to the THE_ONE_ACCESS_TOKEN env variable
       def initialize(access_token: nil)
-        @api_url = "https://the-one-api.dev/v2"
         if access_token.nil?
           access_token = ENV["THE_ONE_ACCESS_TOKEN"]
         end
@@ -33,13 +33,9 @@ module Lotr
       # @return [Array<Movie>] A list of all movies
       def movies(q: {}, fetch_all: false)
         params = PAGINATION_DEFAULT.merge(q)
-        endpoint = "/movie?#{transform_query_parameters(params)}"
-        uri = URI("#{@api_url}/#{endpoint}")
-        response = JSON.parse(@client.get(uri).body)
-        movies_list = response["docs"].map do |movie_data|
-          Movie.new(movie_data)
-        end
-        if fetch_all && (params[:page] * params[:limit]) < response["total"]
+        response = call_api("/movie", params: params)
+        movies_list = response_to_model(Movie, response)
+        if fetch_all && paginate?
           params[:page] += 1
           movies_list += movies(q: params, fetch_all: true)
         end
@@ -51,13 +47,8 @@ module Lotr
       # @return [Movie] The movie corresponding to the ID
       def movie(id)
         id = validate_id(id)
-        endpoint = "movie/#{id}"
-        uri = URI("#{@api_url}/#{endpoint}")
-        response = JSON.parse(@client.get(uri).body)
-        raise Exception::ResourceNotFoundError.new(:movie, id) if response["total"].zero?
-
-        movie_data = response["docs"].first
-        Movie.new(movie_data)
+        response = call_api("movie/#{id}")
+        response_to_model(Movie, response, id: id)
       end
 
       # Fetch all quotes
@@ -65,13 +56,9 @@ module Lotr
       # @return [Array<Movie>] A list of all movies
       def quotes(q: {}, fetch_all: false)
         params = PAGINATION_DEFAULT.merge(q)
-        endpoint = "/quote?#{transform_query_parameters(params)}"
-        uri = URI("#{@api_url}/#{endpoint}")
-        response = JSON.parse(@client.get(uri).body)
-        quotes_list = response["docs"].map do |quote_data|
-          Quote.new(quote_data)
-        end
-        if fetch_all && (params[:page] * params[:limit]) < response["total"]
+        response = call_api("/quote", params: params)
+        quotes_list = response_to_model(Quote, response)
+        if fetch_all && paginate?(params, response)
           params[:page] += 1
           quotes_list += quotes(q: params, fetch_all: true)
         end
@@ -90,13 +77,9 @@ module Lotr
         raise Exception::MovieNotSupportedError.new(MOVIES_WITH_QUOTES) unless ENV["DISABLE_MOVIE_CHECK"] || MOVIES_WITH_QUOTES.include?(movie_id)
 
         params = PAGINATION_DEFAULT.merge(q)
-        endpoint = "/movie/#{movie_id}/quote?#{transform_query_parameters(params)}"
-        uri = URI("#{@api_url}/#{endpoint}")
-        response = JSON.parse(@client.get(uri).body)
-        quotes_list = response["docs"].map do |quote_data|
-          Quote.new(quote_data)
-        end
-        if fetch_all && (params[:page] * params[:limit]) < response["total"]
+        response = call_api("/movie/#{movie_id}/quote", params: params)
+        quotes_list = response_to_model(Quote, response)
+        if fetch_all && paginate?(params, response)
           params[:page] += 1
           quotes_list += quotes(q: params, fetch_all: true)
         end
@@ -115,13 +98,8 @@ module Lotr
       # @return [Movie] The quote corresponding to the ID
       def quote(id)
         quote_id = validate_id(id)
-        endpoint = "/quote/#{quote_id}"
-        uri = URI("#{@api_url}/#{endpoint}")
-        response = JSON.parse(@client.get(uri).body)
-        raise Exception::ResourceNotFoundError.new(:quote, id) if response["total"].zero?
-
-        quote_data = response["docs"].first
-        Quote.new(quote_data)
+        response = call_api("/quote/#{quote_id}")
+        response_to_model(Quote, response, id: id)
       end
 
       private
@@ -147,8 +125,40 @@ module Lotr
           end.join("&")
         end
 
-        def handle_pagination
+        # Make API call and handle query parameters
+        # @param [String] endpoint Endpoint to make API call against
+        # @param [Hash] params Query params
+        # @return [Hash] API response
+        def call_api(endpoint, params: nil)
+          if params
+            endpoint = "#{endpoint}?#{transform_query_parameters(params)}"
+          end
+          uri = URI("#{API_URL}/#{endpoint}")
+          JSON.parse(@client.get(uri).body)
+        end
 
+        # Transform API response to a class
+        # @param [Movie|Quote] model Model to instantiate with response
+        # @param [Hash] response Data from the API response
+        # @return [Array<Movie|Quote> | Movie | Quote] API response
+        def response_to_model(model, response, id: nil)
+          if id
+            raise Exception::ResourceNotFoundError.new(model.to_s.downcase, id) if response["total"].zero?
+
+            model.new(response["docs"].first)
+          else
+            response["docs"].map do |data|
+              model.new(data)
+            end
+          end
+        end
+
+        # Helper class to determine if pagination needs to continue
+        # @param [Hash] params Params hash with page and limit
+        # @param [Hash] response Data from the API response
+        # @return [Boolean]
+        def paginate?(params, response)
+          (params[:page] * params[:limit]) < response["total"]
         end
     end
   end
