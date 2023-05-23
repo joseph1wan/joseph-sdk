@@ -6,6 +6,11 @@ module Lotr
     class Client
       ID_REGEX = /^[0-9a-f]{24}$/i.freeze
       MOVIES_WITH_QUOTES = %w[5cd95395de30eff6ebccde5c 5cd95395de30eff6ebccde5b 5cd95395de30eff6ebccde5d"].freeze # IDs for the original trilogy
+      PAGINATION_DEFAULT = {
+        limit: 100,
+        page: 1,
+        offset: 0
+      }.freeze
 
       # Initialize client with an access token
       #   1. Sign up at https://the-one-api.dev/sign-up
@@ -26,16 +31,19 @@ module Lotr
       # Fetch all movies
       # @param q [Object] Hash of query parameters. For example: { name: "Series" }
       # @return [Array<Movie>] A list of all movies
-      def movies(q: {})
-        endpoint = "movie"
-        if q.any?
-          endpoint += "?" + transform_query_parameters(q)
-        end
+      def movies(q: {}, fetch_all: false)
+        params = PAGINATION_DEFAULT.merge(q)
+        endpoint = "/movie?#{transform_query_parameters(params)}"
         uri = URI("#{@api_url}/#{endpoint}")
         response = JSON.parse(@client.get(uri).body)
-        response["docs"].map do |movie_data|
+        movies_list = response["docs"].map do |movie_data|
           Movie.new(movie_data)
         end
+        if fetch_all && (params[:page] * params[:limit]) < response["total"]
+          params[:page] += 1
+          movies_list += movies(q: params, fetch_all: true)
+        end
+        movies_list
       end
 
       # Fetch a specified movie
@@ -55,16 +63,19 @@ module Lotr
       # Fetch all quotes
       # @param q [Object] Hash of query and pagination parameters. For example: { dialog: "Oooh", page: 2 }
       # @return [Array<Movie>] A list of all movies
-      def quotes(q: {})
-        endpoint = "/quote"
-        if q.any?
-          endpoint += "?" + transform_query_parameters(q)
-        end
+      def quotes(q: {}, fetch_all: false)
+        params = PAGINATION_DEFAULT.merge(q)
+        endpoint = "/quote?#{transform_query_parameters(params)}"
         uri = URI("#{@api_url}/#{endpoint}")
         response = JSON.parse(@client.get(uri).body)
-        response["docs"].map do |quote_data|
+        quotes_list = response["docs"].map do |quote_data|
           Quote.new(quote_data)
         end
+        if fetch_all && (params[:page] * params[:limit]) < response["total"]
+          params[:page] += 1
+          quotes_list += quotes(q: params, fetch_all: true)
+        end
+        quotes_list
       end
 
       # Fetch all quotes belonging to a movie.
@@ -72,20 +83,24 @@ module Lotr
       #   The Fellowship of the Ring
       #   The Two Towers
       #   The Return of the King
+      # @param q [Object] Hash of query and pagination parameters. For example: { dialog: "Oooh", page: 2 }
       # @return [Array<Quote>] All quotes belonging to the movie
-      def movie_quotes(id, q: {})
+      def movie_quotes(id, q: {}, fetch_all: false)
         movie_id = validate_id(id)
         raise Exception::MovieNotSupportedError.new(MOVIES_WITH_QUOTES) unless ENV["DISABLE_MOVIE_CHECK"] || MOVIES_WITH_QUOTES.include?(movie_id)
 
-        endpoint = "/movie/#{movie_id}/quote"
-        if q.any?
-          endpoint += "?" + transform_query_parameters(q)
-        end
+        params = PAGINATION_DEFAULT.merge(q)
+        endpoint = "/movie/#{movie_id}/quote?#{transform_query_parameters(params)}"
         uri = URI("#{@api_url}/#{endpoint}")
         response = JSON.parse(@client.get(uri).body)
-        response["docs"].map do |quote_data|
+        quotes_list = response["docs"].map do |quote_data|
           Quote.new(quote_data)
         end
+        if fetch_all && (params[:page] * params[:limit]) < response["total"]
+          params[:page] += 1
+          quotes_list += quotes(q: params, fetch_all: true)
+        end
+        quotes_list
       end
 
       # Fetch all quotes belonging to a movie.
@@ -130,6 +145,10 @@ module Lotr
               "#{k}=/.*#{v}.*/"
             end
           end.join("&")
+        end
+
+        def handle_pagination
+
         end
     end
   end
