@@ -64,6 +64,15 @@ module Lotr
           result = Client.new.quotes
           expect(result.any?).to be_truthy
           expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+          expect(result.length).to eq(100)
+        end
+
+        context "when fetch_all = true" do
+          it "returns all quotes" do
+            result = Client.new.quotes(q: { limit: 1000 }, fetch_all: true)
+            expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+            expect(result.length > 1000).to be_truthy
+          end
         end
       end
 
