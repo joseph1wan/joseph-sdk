@@ -1,0 +1,105 @@
+{
+  "http_interactions": [
+    {
+      "request": {
+        "method": "get",
+        "uri": "https://the-one-api.dev/v2/movie/5cd95395de30eff6ebccde56",
+        "body": {
+          "encoding": "UTF-8",
+          "string": ""
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer <ACCESS_TOKEN>"
+          ],
+          "Connection": [
+            "close"
+          ],
+          "Host": [
+            "the-one-api.dev"
+          ],
+          "User-Agent": [
+            "http.rb/5.1.1"
+          ]
+        }
+      },
+      "response": {
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "headers": {
+          "Date": [
+            "Wed, 24 May 2023 20:02:00 GMT"
+          ],
+          "Server": [
+            "Apache/2.4.41 (Ubuntu)"
+          ],
+          "Content-Security-Policy": [
+            "default-src 'self';base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+          ],
+          "X-Dns-Prefetch-Control": [
+            "off"
+          ],
+          "Expect-Ct": [
+            "max-age=0"
+          ],
+          "X-Frame-Options": [
+            "SAMEORIGIN"
+          ],
+          "Strict-Transport-Security": [
+            "max-age=15552000; includeSubDomains"
+          ],
+          "X-Download-Options": [
+            "noopen"
+          ],
+          "X-Content-Type-Options": [
+            "nosniff"
+          ],
+          "X-Permitted-Cross-Domain-Policies": [
+            "none"
+          ],
+          "Referrer-Policy": [
+            "no-referrer"
+          ],
+          "X-Xss-Protection": [
+            "0"
+          ],
+          "Access-Control-Allow-Origin": [
+            "*"
+          ],
+          "X-Ratelimit-Limit": [
+            "100"
+          ],
+          "X-Ratelimit-Remaining": [
+            "14"
+          ],
+          "X-Ratelimit-Reset": [
+            "1684958823"
+          ],
+          "Content-Type": [
+            "application/json; charset=utf-8"
+          ],
+          "Content-Length": [
+            "292"
+          ],
+          "Etag": [
+            "W/\"124-rMpzkQgACxn6GAbybMj5DfZZN7A\""
+          ],
+          "Connection": [
+            "close"
+          ]
+        },
+        "body": {
+          "encoding": "UTF-8",
+          "string": "{\"docs\":[{\"_id\":\"5cd95395de30eff6ebccde56\",\"name\":\"The Lord of the Rings Series\",\"runtimeInMinutes\":558,\"budgetInMillions\":281,\"boxOfficeRevenueInMillions\":2917,\"academyAwardNominations\":30,\"academyAwardWins\":17,\"rottenTomatoesScore\":94}],\"total\":1,\"limit\":1000,\"offset\":0,\"page\":1,\"pages\":1}"
+        }
+      },
+      "recorded_at": "Wed, 24 May 2023 20:02:00 GMT"
+    }
+  ],
+  "recorded_with": "VCR 6.1.0"
+}

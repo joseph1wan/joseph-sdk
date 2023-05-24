@@ -15,18 +15,22 @@ module Lotr
 
       describe "#movies" do
         it "returns a list of all movies" do
-          result = Client.new.movies
-          expect(result.any?).to be_truthy
-          expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Movie)
+          VCR.use_cassette("movies") do
+            result = Client.new.movies
+            expect(result.any?).to be_truthy
+            expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Movie)
+          end
         end
 
         context "search for name" do
           it "looks for movies with a matching name" do
-            search_term = "Series"
-            movies = Client.new.movies(q: { name: search_term})
-            expect(movies.any?).to be_truthy
-            movies.each do |movie|
-              expect(movie.name).to include(search_term)
+            VCR.use_cassette("movies_with_search") do
+              search_term = "Series"
+              movies = Client.new.movies(q: { name: search_term})
+              expect(movies.any?).to be_truthy
+              movies.each do |movie|
+                expect(movie.name).to include(search_term)
+              end
             end
           end
         end
@@ -36,9 +40,11 @@ module Lotr
         context "valid id" do
           let(:lotr_series_id) { "5cd95395de30eff6ebccde56" }
           it "returns a specific movie by ID" do
-            result = Client.new.movie(lotr_series_id)
-            expect(result.class).to eq(Lotr::Sdk::Movie)
-            expect(result.name).to eq("The Lord of the Rings Series")
+            VCR.use_cassette("movie_lotr_series") do
+              result = Client.new.movie(lotr_series_id)
+              expect(result.class).to eq(Lotr::Sdk::Movie)
+              expect(result.name).to eq("The Lord of the Rings Series")
+            end
           end
         end
 
@@ -53,7 +59,9 @@ module Lotr
           context "id not found" do
             let(:id) { "0cd95395de30eff6ebccde56" }
             it "raised an error" do
-              expect { Client.new.movie(id) }.to raise_error(Exception::ResourceNotFoundError, /movie/)
+              VCR.use_cassette("movie_not_found") do
+                expect { Client.new.movie(id) }.to raise_error(Exception::ResourceNotFoundError, /movie/)
+              end
             end
           end
         end
@@ -61,17 +69,21 @@ module Lotr
 
       describe "#quotes" do
         it "returns a list of quotes for the given movie" do
-          result = Client.new.quotes
-          expect(result.any?).to be_truthy
-          expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
-          expect(result.length).to eq(100)
+          VCR.use_cassette("quotes") do
+            result = Client.new.quotes
+            expect(result.any?).to be_truthy
+            expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+            expect(result.length).to eq(100)
+          end
         end
 
         context "when fetch_all = true" do
           it "returns all quotes" do
-            result = Client.new.quotes(q: { limit: 1000 }, fetch_all: true)
-            expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
-            expect(result.length > 1000).to be_truthy
+            VCR.use_cassette("all_quotes") do
+              result = Client.new.quotes(q: { limit: 1000 }, fetch_all: true)
+              expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+              expect(result.length > 1000).to be_truthy
+            end
           end
         end
       end
@@ -80,9 +92,11 @@ module Lotr
         context "movie is a LotR trilogy entry" do
           let(:two_towers_id) { "5cd95395de30eff6ebccde5b" }
           it "returns a list of quotes for the given movie" do
-            result = Client.new.movie_quotes(two_towers_id)
-            expect(result.any?).to be_truthy
-            expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+            VCR.use_cassette("movie_quotes_two_towers") do
+              result = Client.new.movie_quotes(two_towers_id)
+              expect(result.any?).to be_truthy
+              expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+            end
           end
         end
 
@@ -101,19 +115,23 @@ module Lotr
       describe "#movie_quotes_from_movie" do
         let(:two_towers_id) { "5cd95395de30eff6ebccde5b" }
         it "returns a list of quotes for the given movie" do
-          movie = Movie.new("_id" => two_towers_id)
-          result = Client.new.movie_quotes_from_movie(movie)
-          expect(result.any?).to be_truthy
-          expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+          VCR.use_cassette("movie_quotes_two_towers") do
+            movie = Movie.new("_id" => two_towers_id)
+            result = Client.new.movie_quotes_from_movie(movie)
+            expect(result.any?).to be_truthy
+            expect(result.map(&:class).uniq.first).to eq(Lotr::Sdk::Quote)
+          end
         end
       end
 
       describe "#quote" do
         let(:oooohhh_quote_id) { "5cd96e05de30eff6ebcce7f7" }
         it "returns a list of quote with the specified ID" do
-          result = Client.new.quote(oooohhh_quote_id)
-          expect(result.is_a?(Lotr::Sdk::Quote)).to be_truthy
-          expect(result.dialog).to eq("Oooohhh!")
+          VCR.use_cassette("quote") do
+            result = Client.new.quote(oooohhh_quote_id)
+            expect(result.is_a?(Lotr::Sdk::Quote)).to be_truthy
+            expect(result.dialog).to eq("Oooohhh!")
+          end
         end
 
         context "invalid id" do
@@ -127,7 +145,9 @@ module Lotr
           context "id not found" do
             let(:id) { "0cd95395de30eff6ebccde56" }
             it "raised an error" do
-              expect { Client.new.quote(id) }.to raise_error(Exception::ResourceNotFoundError, /quote/)
+              VCR.use_cassette("quote_not_found") do
+                expect { Client.new.quote(id) }.to raise_error(Exception::ResourceNotFoundError, /quote/)
+              end
             end
           end
         end

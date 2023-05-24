@@ -2,6 +2,19 @@
 
 require "lotr/sdk"
 require "pry"
+require "vcr"
+require "webmock"
+
+VCR.configure do |config|
+  config.cassette_library_dir = "spec/cassettes"
+  config.default_cassette_options = {
+    serialize_with: :json
+  }
+  config.hook_into :webmock
+  config.ignore_localhost = true
+  config.filter_sensitive_data("<ACCESS_TOKEN>") { ENV["THE_ONE_ACCESS_TOKEN"] }
+  config.configure_rspec_metadata!
+end
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
