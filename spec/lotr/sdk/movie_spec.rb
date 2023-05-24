@@ -33,21 +33,21 @@ module Lotr
           end
         end
 
-        describe "#run_time_minutes" do
-          it "returns run time in minutes" do
-            expect(Movie.new(data).run_time_minutes).to eq(558)
+        describe "#runtime_in_minutes" do
+          it "returns runtime in minutes" do
+            expect(Movie.new(data).runtime_in_minutes).to eq(558)
           end
         end
 
-        describe "#budget_millions" do
+        describe "#budget_in_millions" do
           it "returns the budget in millions" do
-            expect(Movie.new(data).budget_millions).to eq(281)
+            expect(Movie.new(data).budget_in_millions).to eq(281)
           end
         end
 
-        describe "#revenue_millions" do
+        describe "#box_office_revenue_in_millions" do
           it "returns the revenue in millions" do
-            expect(Movie.new(data).revenue_millions).to eq(2917)
+            expect(Movie.new(data).box_office_revenue_in_millions).to eq(2917)
           end
         end
 

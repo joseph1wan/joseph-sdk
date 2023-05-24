@@ -13,6 +13,8 @@ module Lotr
         offset: 0
       }.freeze
 
+      attr_reader :client
+
       # Initialize client with an access token
       #   1. Sign up at https://the-one-api.dev/sign-up
       #   2. Provide the access token.
