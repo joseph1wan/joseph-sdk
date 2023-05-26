@@ -1,5 +1,11 @@
 # Lotr::Sdk
 
+## Context
+
+This project started as a take-home assignment for a company. I'm not using it to practice SDK development on the side.
+
+## Overview
+
 `lotr-sdk` is a Ruby gem that provides a SDK to help The Lord of the Rings lovers consume data about the epic books by J. R. R. Tolkien and the official movie adaptions by Peter Jackson. This SDK leverages [The One API](https://the-one-api.dev) the one API to rule them all.
 
 This SDK currently implements methods to work with movies and movie quotes
